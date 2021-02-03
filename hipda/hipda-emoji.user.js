@@ -27,17 +27,17 @@
   function insertEmojiTrigger(elem, style) {
     elem.insertAdjacentHTML(
       'afterend',
-      `<a id="emoji-trigger" style="${style}">😀</a>`,
+      `<a id="emoji-trigger" style="text-indent: 0; cursor: pointer; ${style}">😀</a>`,
     );
   }
 
   fastPostSmiliesElem &&
     insertEmojiTrigger(
       fastPostSmiliesElem,
-      'text-indent: 0; background: none; text-decoration: none',
+      'background: none; text-decoration: none',
     );
   cmdBeforeElem &&
-    insertEmojiTrigger(cmdBeforeElem, 'text-indent: 0; text-align: center');
+    insertEmojiTrigger(cmdBeforeElem, 'text-align: center');
 
   const emojiSize = 24;
   function loadEmojiButton() {
