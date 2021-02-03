@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         hipda-emoji
-// @namespace    https://github.com/maltoze
+// @namespace    https://github.com/maltoze/tampermonkey-scripts
 // @version      0.2.0
 // @description  HiPDA emoji support
 // @author       maltoze
