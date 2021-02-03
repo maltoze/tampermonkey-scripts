@@ -36,8 +36,7 @@
       fastPostSmiliesElem,
       'background: none; text-decoration: none',
     );
-  cmdBeforeElem &&
-    insertEmojiTrigger(cmdBeforeElem, 'text-align: center');
+  cmdBeforeElem && insertEmojiTrigger(cmdBeforeElem, 'text-align: center');
 
   const emojiSize = 24;
   function loadEmojiButton() {
@@ -53,16 +52,21 @@
         },
       });
       const trigger = document.querySelector('#emoji-trigger');
-      const fastPostMessageElem = document.querySelector('#fastpostmessage');
+      const fastPostElem = document.querySelector('#fastpostmessage');
       const postBoxIframe = document.querySelector('#postbox #e_iframe');
       const postBoxBodyElem =
         postBoxIframe && postBoxIframe.contentWindow.document.querySelector('body');
 
       picker.on('emoji', (selection) => {
         const imgUrl = selection.url;
-        if (fastPostMessageElem) {
-          fastPostMessageElem.value +=
-            '[img=${emojiSize},${emojiSize}]' + imgUrl + '[/img]';
+        if (fastPostElem) {
+          const emojiStr = '[img=${emojiSize},${emojiSize}]' + imgUrl + '[/img]';
+          const fastPostValue = fastPostElem.value;
+          fastPostElem.value = ''.concat(
+            fastPostValue.slice(0, fastPostElem.selectionStart),
+            emojiStr,
+            fastPostValue.slice(fastPostElem.selectionEnd),
+          );
         }
         if (postBoxBodyElem) {
           postBoxBodyElem.innerHTML +=
