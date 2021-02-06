@@ -125,7 +125,7 @@
       const fastPostValue = fastPostElem.value;
       fastPostElem.value = ''.concat(
         fastPostValue.slice(0, fastPostElem.selectionStart),
-        `img]${gifUrl}[/img]`,
+        `[img]${gifUrl}[/img]`,
         fastPostValue.slice(fastPostElem.selectionEnd),
       );
     }
