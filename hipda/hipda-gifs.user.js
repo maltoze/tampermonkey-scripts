@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         hipda-GIFs
 // @namespace    https://github.com/maltoze/tampermonkey-scripts
-// @version      0.1.0
+// @version      0.1.1
 // @description  GIFs support for HiPDA
 // @author       maltoze
-// @match        https://www.hi-pda.com/forum/viewthread.php*
+// @match        https://www.hi-pda.com/forum/*
 // @require      https://cdn.jsdelivr.net/npm/@popperjs/core@2/dist/umd/popper.min.js
 // @require      https://cdn.jsdelivr.net/npm/tippy.js@6/dist/tippy-bundle.umd.min.js
 // @require      https://cdn.jsdelivr.net/gh/maltoze/tampermonkey-scripts/hipda/dist/hipda-giphy.umd.min.js
@@ -18,9 +18,28 @@
   const lastActionElem = document.querySelector(
     '#fastpostform > table > tbody > tr > td.postcontent > div > div > a:last-of-type',
   );
-  if (!lastActionElem) {
+  const cmdSmiliesElem = document.querySelector('#e_cmd_smilies');
+  if (!lastActionElem && !cmdSmiliesElem) {
     return;
   }
+  const gifBtnOfPostBoxElem = document.createElement('a');
+  gifBtnOfPostBoxElem.style.padding = '2px 0 26px 0';
+  gifBtnOfPostBoxElem.style.cursor = 'pointer';
+  gifBtnOfPostBoxElem.style.background = 'none';
+  gifBtnOfPostBoxElem.innerHTML = `
+    <svg width="22" height="26" viewBox="0 0 22 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="17.7939" y="8.52844" width="2.877" height="14.0941" fill="#9933FF"></rect>
+      <rect x="0.531494" y="22.6226" width="20.139" height="2.81882" fill="#00CCFF"></rect>
+      <rect x="0.531494" y="2.89081" width="2.877" height="19.7317" fill="#00FF99"></rect>
+      <rect x="0.531494" y="0.0720215" width="11.508" height="2.81882" fill="#FFF35C"></rect>
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M17.7936 5.70966V2.89084H14.9166V0.0720215H12.0396V2.90493V2.91903V5.72375V5.72375V8.52848H14.9166H17.7936V8.52848H20.6706V5.70966H17.7936Z" fill="#FF6666"></path>
+      <path opacity="0.4" fill-rule="evenodd" clip-rule="evenodd" d="M12.0394 0.0720215V2.89084H9.16235L12.0394 0.0720215Z" fill="#0F0F0F"></path>
+      <path opacity="0.4" fill-rule="evenodd" clip-rule="evenodd" d="M17.7939 11.3754V8.52844H20.6709L17.7939 11.3754Z" fill="#0F0F0F"></path>
+    </svg>GIF
+  `;
+  cmdSmiliesElem &&
+    cmdSmiliesElem.insertAdjacentElement('afterend', gifBtnOfPostBoxElem);
+
   const gifBtnElem = document.createElement('a');
   gifBtnElem.style.textIndent = 0;
   gifBtnElem.style.textDecoration = 'none';
@@ -40,7 +59,8 @@
       </defs>
     </svg>
   `;
-  lastActionElem.insertAdjacentElement('afterend', gifBtnElem);
+  lastActionElem &&
+    lastActionElem.insertAdjacentElement('afterend', gifBtnElem);
 
   const gifsContainerId = 'hipda-GIFs__container';
   const gifsContainer = document.createElement('div');
@@ -100,16 +120,23 @@
   const handleOnGifClick = (gif, e) => {
     e.preventDefault();
     const fastPostElem = document.querySelector('#fastpostmessage');
-    if (!fastPostElem) {
-      return;
+    const gifUrl = gif.images.original.url;
+    if (fastPostElem) {
+      const fastPostValue = fastPostElem.value;
+      fastPostElem.value = ''.concat(
+        fastPostValue.slice(0, fastPostElem.selectionStart),
+        `img]${gifUrl}[/img]`,
+        fastPostValue.slice(fastPostElem.selectionEnd),
+      );
     }
-    const fastPostGifStr = `[img]${gif.images.original.url}[/img]`;
-    const fastPostValue = fastPostElem.value;
-    fastPostElem.value = ''.concat(
-      fastPostValue.slice(0, fastPostElem.selectionStart),
-      fastPostGifStr,
-      fastPostValue.slice(fastPostElem.selectionEnd),
-    );
+    const postBoxIframe = document.querySelector('#postbox #e_iframe');
+    const postBoxBodyElem =
+      postBoxIframe &&
+      postBoxIframe.contentWindow.document.querySelector('body');
+    if (postBoxBodyElem) {
+      postBoxBodyElem.innerHTML += `<img src="${gifUrl}" alt="${gif.title}" />`;
+    }
+    tippyInstance.hide();
   };
 
   const makeGrid = (fetchFunc, key = 'trending') => {
@@ -153,7 +180,8 @@
 
   const tippyTheme = GM_getResourceText('lightBorderCss');
   GM_addStyle(tippyTheme);
-  tippy(gifBtnElem, {
+  const tippyTargetElem = lastActionElem ? gifBtnElem : gifBtnOfPostBoxElem;
+  const tippyInstance = tippy(tippyTargetElem, {
     content: gifsContainer,
     trigger: 'click',
     interactive: true,
