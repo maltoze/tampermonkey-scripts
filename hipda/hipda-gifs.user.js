@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         hipda-GIFs
 // @namespace    https://github.com/maltoze/tampermonkey-scripts
-// @version      0.1.1
+// @version      0.1.2
 // @description  GIFs support for HiPDA
 // @author       maltoze
 // @match        https://www.hi-pda.com/forum/*
@@ -111,10 +111,11 @@
   );
 
   const gf = new hipdaGiphy.GiphyFetch('askdHCgTjMe0SVXAnUe15PICPgF1zlWh');
+  const gfOptions = { limit: 20, lang: 'zh-CN' };
   const searchGifs = (term) => (offset) =>
-    gf.search(term, { offset, limit: 10, lang: 'zh-CN' });
+    gf.search(term, { ...gfOptions, offset });
   const fetchTrendingGifs = (offset) => {
-    return gf.trending({ offset, limit: 10 });
+    return gf.trending({ ...gfOptions, offset});
   };
 
   const handleOnGifClick = (gif, e) => {
