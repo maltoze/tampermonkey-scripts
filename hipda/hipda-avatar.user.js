@@ -6,6 +6,7 @@
 // @author       maltoze
 // @match        https://www.hi-pda.com/forum/forumdisplay.php?fid=*
 // @require      https://cdn.jsdelivr.net/npm/lozad/dist/lozad.min.js
+// @license      MIT
 // ==/UserScript==
 
 (function () {
