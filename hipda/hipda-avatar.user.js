@@ -1,5 +1,6 @@
 // ==UserScript==
 // @name         hipda-avatar
+// @namespace    https://github.com/maltoze/tampermonkey-scripts
 // @version      0.1
 // @description  在帖子列表显示头像
 // @author       maltoze
