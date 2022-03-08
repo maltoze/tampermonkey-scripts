@@ -4,7 +4,7 @@
 // @version      0.1.0
 // @description  支持在输入框粘贴图片
 // @author       maltoze
-// @match        https://www.hi-pda.com/forum/*
+// @match        https://www.hi-pda.com/forum/post.php?*
 // @license      MIT
 // ==/UserScript==
 
@@ -31,7 +31,6 @@
     formData.append('uid', uidMatch[1]);
     formData.append('hash', hashInputEl.value);
     formData.append('Filedata', imgFile, 'image.png');
-    console.log(formData);
 
     return fetch(IMG_UPLOAD_URL, {
       method: 'POST',
