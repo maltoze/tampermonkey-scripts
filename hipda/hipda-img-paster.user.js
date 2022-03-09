@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         hipda-img-paster
 // @namespace    https://github.com/maltoze/tampermonkey-scripts
-// @version      0.1.2
+// @version      0.1.3
 // @description  支持在发帖/回帖(高级模式)时直接粘贴图片
 // @author       maltoze
 // @match        https://www.hi-pda.com/forum/post.php?*
@@ -16,7 +16,10 @@
   const COMMON_OPTIONS = { credentials: 'same-origin' };
   const TIMEOUT = 30000;
 
+  // chrome/edge
   const iframeEl = document.getElementById('e_iframe');
+  // firefox
+  const textAreaEl = document.getElementById('e_textarea');
 
   function imgListAjaxUrlGenenter(postTime) {
     return `${BASE_URL}ajax.php?action=imagelist&pid=NaN&posttime=${postTime.toFixed()}`;
@@ -45,10 +48,12 @@
   }
 
   function insertNode(node) {
-    const sel = iframeEl.contentWindow.getSelection();
-    const range = sel.getRangeAt(0);
-    range.insertNode(node);
-    range.collapse();
+    const sel = (iframeEl?.contentWindow || window).getSelection();
+    if (sel.rangeCount > 0) {
+      const range = sel.getRangeAt(0);
+      range.insertNode(node);
+      range.collapse();
+    }
   }
 
   async function handleOnPaste(event) {
@@ -89,9 +94,17 @@
       }
       const imgElStr = `<img src="${imgEl.src}" aid="attachimg_${imgId}" border="0" alt="" width="${imgEl.width}" />`;
 
-      // https://img02.hi-pda.com/forum/forumdata/cache/post.js
-      // eslint-disable-next-line no-undef
-      insertText(imgElStr, false);
+      if (iframeEl) {
+        // https://img02.hi-pda.com/forum/forumdata/cache/post.js
+        // eslint-disable-next-line no-undef
+        insertText(imgElStr, false);
+      } else {
+        if (textAreaEl) {
+          const insertStr = `[attachimg]${imgId}[/attachimg]`;
+          // eslint-disable-next-line no-undef
+          insertText(insertStr, insertStr.length, 0);
+        }
+      }
     }
   }
 
@@ -101,5 +114,9 @@
 
   if (iframeEl) {
     iframeEl.contentDocument.body.addEventListener('paste', handleOnPaste);
+  } else {
+    if (textAreaEl) {
+      textAreaEl.addEventListener('paste', handleOnPaste);
+    }
   }
 })();
