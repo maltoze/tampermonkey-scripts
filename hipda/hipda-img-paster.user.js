@@ -13,9 +13,13 @@
 
   const BASE_URL = 'https://www.hi-pda.com/forum/';
   const IMG_UPLOAD_URL = `${BASE_URL}misc.php?action=swfupload&operation=upload&simple=1&type=image`;
-  const postTime = new Date().getTime() / 1000;
-  const IMG_LIST_URL = `${BASE_URL}ajax.php?action=imagelist&pid=NaN&posttime=${postTime.toFixed()}&inajax=1&ajaxtarget=imgattachlist`;
   const COMMON_OPTIONS = { credentials: 'same-origin' };
+
+  const iframeEl = document.getElementById('e_iframe');
+
+  function imgListUrlGenenter(postTime) {
+    return `${BASE_URL}ajax.php?action=imagelist&pid=NaN&posttime=${postTime.toFixed()}&inajax=1&ajaxtarget=imgattachlist`;
+  }
 
   function uploadImg(imgFile) {
     const userSpaceEl = document.querySelector('#umenu > cite > a');
@@ -40,12 +44,20 @@
   }
 
   async function getImgUrl(imgId) {
-    const resp = await fetch(IMG_LIST_URL, COMMON_OPTIONS);
+    const postTime = new Date().getTime() / 1000;
+    const resp = await fetch(imgListUrlGenenter(postTime), COMMON_OPTIONS);
     const respText = await resp.text();
     const urlMatch = respText.match(
       new RegExp(String.raw`<img.*src="([\w\/\.]+)".*id="image_${imgId}"`),
     );
     if (urlMatch) return urlMatch[1];
+  }
+
+  function insertNode(node) {
+    const sel = iframeEl.contentWindow.getSelection();
+    const range = sel.getRangeAt(0);
+    range.insertNode(node);
+    range.collapse();
   }
 
   async function handleOnPaste(event) {
@@ -57,33 +69,27 @@
     if (items.length === 0) {
       return;
     }
-
     event.preventDefault();
-    const bodyEl = document.querySelector('#e_iframe').contentDocument.body;
+
     const tmpEl = document.createElement('span');
     tmpEl.innerText = '上传中...';
-    bodyEl.append(tmpEl);
+    insertNode(tmpEl);
 
     const item = items[0];
     const resp = await uploadImg(item.getAsFile());
-    const respText = await resp.text();
-    // DISCUZUPLOAD|0|123456|0
-    const imgId = respText.split('|')[2];
-    const imgUrl = await getImgUrl(imgId);
-
     tmpEl.remove();
-
-    const imgEl = document.createElement('img');
-    imgEl.src = `${BASE_URL}${imgUrl}`;
-    bodyEl.append(imgEl);
-  }
-
-  function main() {
-    const iframeEl = document.getElementById('e_iframe');
-    if (iframeEl) {
-      iframeEl.contentDocument.body.addEventListener('paste', handleOnPaste);
+    if (resp) {
+      const respText = await resp.text();
+      // DISCUZUPLOAD|0|123456|0
+      const imgId = respText.split('|')[2];
+      const imgUrl = await getImgUrl(imgId);
+      const imgEl = document.createElement('img');
+      imgEl.src = `${BASE_URL}${imgUrl}`;
+      insertNode(imgEl);
     }
   }
 
-  main();
+  if (iframeEl) {
+    iframeEl.contentDocument.body.addEventListener('paste', handleOnPaste);
+  }
 })();
