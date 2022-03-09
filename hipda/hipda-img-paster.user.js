@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         hipda-img-paster
 // @namespace    https://github.com/maltoze/tampermonkey-scripts
-// @version      0.1.1
+// @version      0.1.2
 // @description  支持在发帖/回帖(高级模式)时直接粘贴图片
 // @author       maltoze
 // @match        https://www.hi-pda.com/forum/post.php?*
@@ -14,11 +14,12 @@
   const BASE_URL = 'https://www.hi-pda.com/forum/';
   const IMG_UPLOAD_URL = `${BASE_URL}misc.php?action=swfupload&operation=upload&simple=1&type=image`;
   const COMMON_OPTIONS = { credentials: 'same-origin' };
+  const TIMEOUT = 30000;
 
   const iframeEl = document.getElementById('e_iframe');
 
-  function imgListUrlGenenter(postTime) {
-    return `${BASE_URL}ajax.php?action=imagelist&pid=NaN&posttime=${postTime.toFixed()}&inajax=1&ajaxtarget=imgattachlist`;
+  function imgListAjaxUrlGenenter(postTime) {
+    return `${BASE_URL}ajax.php?action=imagelist&pid=NaN&posttime=${postTime.toFixed()}`;
   }
 
   function uploadImg(imgFile) {
@@ -41,16 +42,6 @@
       body: formData,
       ...COMMON_OPTIONS,
     });
-  }
-
-  async function getImgUrl(imgId) {
-    const postTime = new Date().getTime() / 1000;
-    const resp = await fetch(imgListUrlGenenter(postTime), COMMON_OPTIONS);
-    const respText = await resp.text();
-    const urlMatch = respText.match(
-      new RegExp(String.raw`<img.*src="([\w\/\.]+)".*id="image_${imgId}"`),
-    );
-    if (urlMatch) return urlMatch[1];
   }
 
   function insertNode(node) {
@@ -82,11 +73,30 @@
       const respText = await resp.text();
       // DISCUZUPLOAD|0|123456|0
       const imgId = respText.split('|')[2];
-      const imgUrl = await getImgUrl(imgId);
-      const imgEl = document.createElement('img');
-      imgEl.src = `${BASE_URL}${imgUrl}`;
-      insertNode(imgEl);
+
+      const postTime = new Date().getTime() / 1000;
+      // https://img02.hi-pda.com/forum/forumdata/cache/common.js
+      // eslint-disable-next-line no-undef
+      ajaxget(imgListAjaxUrlGenenter(postTime), 'imgattachlist');
+
+      let imgEl = document.getElementById(`image_${imgId}`);
+      let msCount = 0;
+      const sleepTime = 100;
+      while (!imgEl && msCount < TIMEOUT) {
+        await sleep(sleepTime);
+        msCount += sleepTime;
+        imgEl = document.getElementById(`image_${imgId}`);
+      }
+      const imgElStr = `<img src="${imgEl.src}" aid="attachimg_${imgId}" border="0" alt="" width="${imgEl.width}" />`;
+
+      // https://img02.hi-pda.com/forum/forumdata/cache/post.js
+      // eslint-disable-next-line no-undef
+      insertText(imgElStr, false);
     }
+  }
+
+  function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   if (iframeEl) {
