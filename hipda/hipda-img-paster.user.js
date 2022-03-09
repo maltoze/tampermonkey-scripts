@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         hipda-img-paster
 // @namespace    https://github.com/maltoze/tampermonkey-scripts
-// @version      0.1.0
-// @description  支持在输入框粘贴图片
+// @version      0.1.1
+// @description  支持在发帖/回帖(高级模式)时直接粘贴图片
 // @author       maltoze
 // @match        https://www.hi-pda.com/forum/post.php?*
 // @license      MIT
