@@ -21,7 +21,7 @@
   // firefox
   const textareaEl = document.getElementById('e_textarea');
 
-  const USE_TEXTAREA = textareaEl ? true : false;
+  const USE_TEXTAREA = textareaEl?.style.display !== 'none' ? true : false;
 
   function imgListAjaxUrlGenenter(postTime) {
     return `${BASE_URL}ajax.php?action=imagelist&pid=NaN&posttime=${postTime.toFixed()}`;
