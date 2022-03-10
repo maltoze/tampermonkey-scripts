@@ -19,7 +19,9 @@
   // chrome/edge
   const iframeEl = document.getElementById('e_iframe');
   // firefox
-  const textAreaEl = document.getElementById('e_textarea');
+  const textareaEl = document.getElementById('e_textarea');
+
+  const USE_TEXTAREA = textareaEl ? true : false;
 
   function imgListAjaxUrlGenenter(postTime) {
     return `${BASE_URL}ajax.php?action=imagelist&pid=NaN&posttime=${postTime.toFixed()}`;
@@ -74,7 +76,7 @@
     const item = items[0];
     const resp = await uploadImg(item.getAsFile());
     tmpEl.remove();
-    if (resp) {
+    if (resp?.ok) {
       const respText = await resp.text();
       // DISCUZUPLOAD|0|123456|0
       const imgId = respText.split('|')[2];
@@ -94,16 +96,14 @@
       }
       const imgElStr = `<img src="${imgEl.src}" aid="attachimg_${imgId}" border="0" alt="" width="${imgEl.width}" />`;
 
-      if (iframeEl) {
+      if (USE_TEXTAREA) {
+        const insertStr = `[attachimg]${imgId}[/attachimg]`;
+        // eslint-disable-next-line no-undef
+        insertText(insertStr, insertStr.length, 0);
+      } else {
         // https://img02.hi-pda.com/forum/forumdata/cache/post.js
         // eslint-disable-next-line no-undef
         insertText(imgElStr, false);
-      } else {
-        if (textAreaEl) {
-          const insertStr = `[attachimg]${imgId}[/attachimg]`;
-          // eslint-disable-next-line no-undef
-          insertText(insertStr, insertStr.length, 0);
-        }
       }
     }
   }
@@ -112,11 +112,9 @@
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
-  if (iframeEl) {
-    iframeEl.contentDocument.body.addEventListener('paste', handleOnPaste);
+  if (USE_TEXTAREA) {
+    textareaEl.addEventListener('paste', handleOnPaste);
   } else {
-    if (textAreaEl) {
-      textAreaEl.addEventListener('paste', handleOnPaste);
-    }
+    iframeEl.contentDocument.body.addEventListener('paste', handleOnPaste);
   }
 })();
