@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         hipda-avatar
 // @namespace    https://github.com/maltoze/tampermonkey-scripts
-// @version      0.1.2
+// @version      0.1.3
 // @description  在帖子列表显示头像
 // @author       maltoze
 // @match        https://www.hi-pda.com/forum/forumdisplay.php?fid=*
@@ -62,7 +62,7 @@
       const authorNode = tbodyNode.querySelector('tr > td.author > cite > a');
       if (!authorNode || !imgNode) continue;
 
-      const subjectNode = tbodyNode.querySelector('tr > th.subject > span > a');
+      const subjectNode = tbodyNode.querySelector('tr > th.subject a');
       if (subjectNode) {
         // 通过改变标题颜色来标记已读
         if (imgNode.src.match(READ_PATTERN)) {
