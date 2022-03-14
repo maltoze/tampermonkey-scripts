@@ -18,6 +18,7 @@
   const BASE_URL = FORUM_SERVER_SSL + '/forum/';
   const SIZE = 24;
   const DEFAULT_AVATAR_PREFIX = `https://ui-avatars.com/api/?background=9287AE&color=fff&size=${SIZE}`;
+  const READ_PATTERN = 'folder_common.gif';
 
   async function getAvatarUrl(uid) {
     const avatarBaseUrl = BASE_URL + 'uc_server/data/avatar/';
@@ -60,6 +61,21 @@
       const imgNode = tbodyNode.querySelector('tr > td.folder > a > img');
       const authorNode = tbodyNode.querySelector('tr > td.author > cite > a');
       if (!authorNode || !imgNode) continue;
+
+      const subjectNode = tbodyNode.querySelector('tr > th.subject > span > a');
+      if (subjectNode) {
+        // 通过改变标题颜色来标记已读
+        if (imgNode.src.match(READ_PATTERN)) {
+          subjectNode.style.color = '#5a5a5a';
+        }
+        // 默认新标签打开
+        subjectNode.setAttribute('target', '_blank');
+      }
+
+      const imgAnchorNode = tbodyNode.querySelector('tr > td.folder > a');
+      imgAnchorNode.removeAttribute('title');
+      // 点击头像打开个人主页
+      imgAnchorNode.setAttribute('href', authorNode.getAttribute('href'));
 
       imgNode.classList.add('lozad');
 
