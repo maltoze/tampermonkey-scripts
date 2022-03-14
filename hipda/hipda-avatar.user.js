@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         hipda-avatar
 // @namespace    https://github.com/maltoze/tampermonkey-scripts
-// @version      0.1.1
+// @version      0.1.2
 // @description  在帖子列表显示头像
 // @author       maltoze
 // @match        https://www.hi-pda.com/forum/forumdisplay.php?fid=*
